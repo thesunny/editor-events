@@ -8,16 +8,6 @@ import LogItem from "../components/LogItem"
 
 const __html = `<p>Hello little world</p>`
 
-const EVENT_PROPS = [
-  "type",
-  "key",
-  "code",
-  "repeat",
-  "isComposing",
-  "inputType",
-  "data",
-]
-
 const NATIVE_EVENTS = [
   "compositionstart",
   "compositionupdate",
@@ -69,10 +59,6 @@ const REACT_EVENTS = [
   "onTouchEnd",
   "onTouchStart",
 ]
-
-function copyEvent(e) {
-  return pick(e, EVENT_PROPS)
-}
 
 function getHTML() {
   const el = document.getElementById("content")
