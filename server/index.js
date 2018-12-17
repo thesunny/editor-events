@@ -1,31 +1,76 @@
-const { MongoClient } = require('mongodb')
+const { MongoClient } = require("mongodb")
 
-const { createServer } = require('http')
-const { parse } = require('url')
-const next = require('next')
+import express from "express"
 
-const dev = process.env.NODE_ENV !== 'production'
+// const express = require("express")
+
+// const { createServer } = require("http")
+const { parse } = require("url")
+const bodyParser = require("body-parser")
+const next = require("next")
+
+const dev = process.env.NODE_ENV !== "production"
 const app = next({ dev })
-const handle = app.getRequestHandler()
+const handleWithNext = app.getRequestHandler()
 
-app.prepare().then(() => {
-  createServer((req, res) => {
-    // Be sure to pass `true` as the second argument to `url.parse`.
-    // This tells it to parse the query portion of the URL.
-    const parsedUrl = parse(req.url, true)
-    const { pathname, query } = parsedUrl
+const MONGO_URL = "mongodb://localhost:27017/editor-events"
+const PORT = 3000
 
-    // if (pathname === '/a') {
-    //   app.render(req, res, '/b', query)
-    // } else if (pathname === '/b') {
-    //   app.render(req, res, '/a', query)
-    // } else {
-      handle(req, res, parsedUrl)
-    // }
-  }).listen(3000, err => {
-    if (err) throw err
-    console.log('> Ready on http://localhost:3000')
+app.prepare().then(async () => {
+  const mongoClient = await MongoClient.connect(MONGO_URL, {
+    useNewUrlParser: true,
   })
+  const db = mongoClient.db("editor-events")
+  const collection = db.collection("editor-events")
+  const server = express()
+  server.use(bodyParser.json())
+  server.use((req, res, next) => {
+    req.db = db
+    next()
+  })
+  server.get("/api/scenarios", async (req, res, next) => {
+    try {
+      const { db } = req
+      const collection = db.collection("scenarios")
+      const scenarios = await (await collection.find({})).toArray()
+      res.send({ scenarios })
+    } catch (e) {
+      next(e)
+    }
+  })
+  server.post("/api/scenario", async (req, res, next) => {
+    try {
+      console.log("body", req.body)
+      res.send(req.body)
+    } catch (e) {
+      next(e)
+    }
+  })
+  server.get("*", (req, res) => {
+    return handleWithNext(req, res)
+  })
+  server.listen(PORT)
+  //   const db = await MongoClient.connect(MONGO_URL)
+  //   createServer((req, res) => {
+  //     // Be sure to pass `true` as the second argument to `url.parse`.
+  //     // This tells it to parse the query portion of the URL.
+  //     const parsedUrl = parse(req.url, true)
+  //     const { pathname, query } = parsedUrl
+
+  //     // if (pathname === '/a') {
+  //     //   app.render(req, res, '/b', query)
+  //     // } else if (pathname === '/b') {
+  //     //   app.render(req, res, '/a', query)
+  //     // } else {
+  //     if (pathname.startsWith("/api/")) {
+  //     } else {
+  //       handleWithNext(req, res, parsedUrl)
+  //     }
+  //     // }
+  //   }).listen(3000, err => {
+  //     if (err) throw err
+  //     console.log("> Ready on http://localhost:3000")
+  //   })
 })
 
 // const api = require('./api')

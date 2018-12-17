@@ -18,6 +18,8 @@ It is specifically created for Android but should work equally well to diagnose 
 
 ## To Do
 
+- [x] Add global bootstrap
+- [x] Add styled components
 - [ ] Create and Edit Scenarios
 - [ ] Create and Delete Recordings
 - [ ] Map User Agent to API versions (maybe created Tags automatically)

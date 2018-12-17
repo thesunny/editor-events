@@ -1,3 +1,6 @@
+import Back from "./components/Back"
+import client from "./util/client"
+
 function Field({
   context,
   Tag = "textarea",
@@ -37,15 +40,22 @@ Enter the word "very" using the virtual keyboard.
 # How to finish the edit
 Hit space on the virtual keyboard to finish composing.`,
   }
+
+  submit = async () => {
+    const { title, html, instructions } = this.state
+    const json = await client.post("/api/scenario", {
+      title,
+      html,
+      instructions,
+    })
+    console.log("json", json)
+  }
+
   render() {
     return (
       <div className="container">
-        <link
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          type="text/css"
-          rel="stylesheet"
-        />
         <form>
+          <Back />
           <h1>Scenario</h1>
           <Field
             context={this}
@@ -67,7 +77,11 @@ Hit space on the virtual keyboard to finish composing.`,
             hint="Provide details instructions on how to complete the edit"
             rows={10}
           />
-          <button type="button" className="btn btn-primary">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={this.submit}
+          >
             Submit Scenario
           </button>
         </form>

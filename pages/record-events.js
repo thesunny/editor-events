@@ -1,69 +1,39 @@
+import styled from "styled-components"
 import pick from "lodash/pick"
+import Link from "next/link"
 import {
   captureNativeEvent,
   captureReactEvent,
   captureHTMLEvent,
 } from "../util/captureEvent"
 import LogItem from "../components/LogItem"
+import { NATIVE_EVENTS, REACT_EVENTS } from "../util/events"
+import Back from "./components/Back"
 
 const __html = `<p>Hello little world</p>`
-
-const NATIVE_EVENTS = [
-  "compositionstart",
-  "compositionupdate",
-  "compositionend",
-  "keydown",
-  "keypress",
-  "keyup",
-  "focus",
-  "blur",
-  "focusin",
-  "focusout",
-  "change",
-  "beforeinput",
-  "input",
-  "mousedown",
-  "mouseup",
-  "click",
-  "dblclick",
-  "pointerdown",
-  "pointerup",
-  "pointercancel",
-  "selectstart",
-  "selectionchange",
-  "touchstart",
-  "touchend",
-  "touchcancel",
-]
-
-const REACT_EVENTS = [
-  "onCompositionStart",
-  "onCompositionUpdate",
-  "onCompositionEnd",
-  "onKeyDown",
-  "onKeyPress",
-  "onKeyUp",
-  "onFocus",
-  "onBlur",
-  "onChange",
-  "onInput",
-  "onClick",
-  "onDoubleClick",
-  "onMouseDown",
-  "onMouseUp",
-  "onPointerDown",
-  "onPointerUp",
-  "onPointerCancel",
-  "onSelect",
-  "onTouchCancel",
-  "onTouchEnd",
-  "onTouchStart",
-]
 
 function getHTML() {
   const el = document.getElementById("content")
   return el.innerHTML
 }
+
+const ContentsDiv = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 60%;
+  bottom: 0;
+  padding: 10px;
+`
+
+const EventsDiv = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 40%;
+  overflow-y: scroll;
+`
 
 export default class RecordEvents extends React.Component {
   isFrame = false
@@ -78,6 +48,13 @@ export default class RecordEvents extends React.Component {
     this.setupReactEventProps()
   }
 
+  setupReactEventProps() {
+    this.reactEventProps = {}
+    REACT_EVENTS.forEach(eventName => {
+      this.reactEventProps[eventName] = this.recordReactEvent
+    })
+  }
+
   componentDidMount() {
     const el = document.getElementById("content")
     NATIVE_EVENTS.forEach(eventName => {
@@ -85,10 +62,10 @@ export default class RecordEvents extends React.Component {
     })
   }
 
-  setupReactEventProps() {
-    this.reactEventProps = {}
-    REACT_EVENTS.forEach(eventName => {
-      this.reactEventProps[eventName] = this.recordReactEvent
+  componentWillUnmount() {
+    const el = document.getElementById("content")
+    NATIVE_EVENTS.forEach(eventName => {
+      el.removeEventListener(eventName, this.recordNativeEvent)
     })
   }
 
@@ -141,38 +118,12 @@ export default class RecordEvents extends React.Component {
     this.pushEvent("REACT", event)
   }
 
-  componentDidUpdate() {
-
-  }
-
   render() {
     const { events } = this.state
     return (
-      <div>
-        <style jsx>{`
-          .Content {
-            position: absolute;
-            top: 0;
-            right: 60%;
-            bottom: 0;
-            left: 0;
-            padding: 10px;
-          }
-          .Events {
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 40%;
-            overflow-y: scroll;
-          }
-        `}</style>
-        <link
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-          type="text/css"
-          rel="stylesheet"
-        />
-        <div className="Content">
+      <div className="container">
+        <ContentsDiv>
+          <Back />
           <div
             id="content"
             className="form-control"
@@ -180,8 +131,8 @@ export default class RecordEvents extends React.Component {
             dangerouslySetInnerHTML={{ __html }}
             {...this.reactEventProps}
           />
-        </div>
-        <div className="Events">
+        </ContentsDiv>
+        <EventsDiv>
           <table className="table table-sm">
             <tbody>
               {events.map((event, index) => {
@@ -189,7 +140,7 @@ export default class RecordEvents extends React.Component {
               })}
             </tbody>
           </table>
-        </div>
+        </EventsDiv>
       </div>
     )
   }
