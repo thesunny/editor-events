@@ -75,7 +75,7 @@ Hit space on the virtual keyboard to finish composing.`,
             name="instructions"
             caption="Instructions"
             hint="Provide details instructions on how to complete the edit"
-            rows={10}
+            rows={8}
           />
           <button
             type="button"
