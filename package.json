@@ -10,11 +10,16 @@
     "mongodb": "^3.1.10",
     "next": "^7.0.2",
     "react": "^16.6.3",
-    "react-dom": "^16.6.3"
+    "react-dom": "^16.6.3",
+    "styled-components": "^4.1.2"
   },
   "scripts": {
-    "dev": "node server/index.js",
+    "dev": "babel-watch -w server --disable-autowatch server/index.js",
     "build": "next build",
     "start": "next start"
+  },
+  "devDependencies": {
+    "babel-plugin-styled-components": "^1.9.4",
+    "babel-watch": "https://github.com/monathur/babel-watch.git"
   }
 }
