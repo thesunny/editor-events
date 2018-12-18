@@ -1,6 +1,7 @@
 import styled from "styled-components"
 import pick from "lodash/pick"
 import Link from "next/link"
+import client from "./util/client"
 import {
   captureNativeEvent,
   captureReactEvent,
@@ -43,9 +44,22 @@ export default class RecordEvents extends React.Component {
     events: [],
   }
 
+  static async getInitialProps({ req, query }) {
+    const userAgent = req ? req.headers["user-agent"] : navigator.userAgent
+    const { scenarioId } = query
+    const json = await client.call("/api/get-scenario", { scenarioId })
+    return { scenario: json.scenario, userAgent }
+  }
+
   constructor(props) {
     super(props)
     this.setupReactEventProps()
+  }
+
+  submit = async () => {
+    const { scenario } = this.props
+    const { events } = this.state
+    console.log(events)
   }
 
   setupReactEventProps() {
@@ -72,7 +86,7 @@ export default class RecordEvents extends React.Component {
   pushLog(source, data) {
     const html = getHTML()
     const { events } = this.state
-    const item = { source, html, ...data }
+    const item = { source, ...data }
     if (html !== this.lastHTML) {
       this.lastHTML = html
       const htmlEvent = captureHTMLEvent(html)
@@ -119,18 +133,30 @@ export default class RecordEvents extends React.Component {
   }
 
   render() {
+    const { userAgent, scenario } = this.props
     const { events } = this.state
     return (
       <div className="container">
         <ContentsDiv>
           <Back />
           <div
-            id="content"
-            className="form-control"
-            contentEditable
-            dangerouslySetInnerHTML={{ __html }}
-            {...this.reactEventProps}
-          />
+            className="card card-body mt-3"
+            style={{ whiteSpace: "pre-line" }}
+          >
+            <h5>{scenario.title}</h5>
+            <code><small>{userAgent}</small></code>
+            <div
+              id="content"
+              className="form-control my-4"
+              contentEditable
+              dangerouslySetInnerHTML={{ __html: scenario.html }}
+              {...this.reactEventProps}
+            />
+            <div>{scenario.instructions}</div>
+            <button className="btn btn-primary mt-4" onClick={this.submit}>
+              Submit Event Log
+            </button>
+          </div>
         </ContentsDiv>
         <EventsDiv>
           <table className="table table-sm">

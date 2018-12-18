@@ -1,5 +1,6 @@
 import Back from "./components/Back"
 import client from "./util/client"
+import Router from "next/router"
 
 function Field({
   context,
@@ -27,11 +28,10 @@ function Field({
   )
 }
 
-export default class Scenario extends React.Component {
-  state = {
-    title: "Insert word at start of existing word using the virtual keyboard",
-    html: "<p>Hello big world.</p>",
-    instructions: `# How to start the edit
+const DEFAULT_STATE = {
+  title: "Insert word at start of existing word using the virtual keyboard",
+  html: "<p>Hello big world.</p>",
+  instructions: `# How to start the edit
 Touch the start of the word "big" to start composing.
 
 # How to make the edit
@@ -39,16 +39,29 @@ Enter the word "very" using the virtual keyboard.
 
 # How to finish the edit
 Hit space on the virtual keyboard to finish composing.`,
+}
+
+export default class Scenario extends React.Component {
+  static async getInitialProps({ query }) {
+    const { scenarioId } = query
+    const json = await client.call("/api/get-scenario", { scenarioId })
+    return { scenario: json.scenario }
+  }
+
+  constructor(props) {
+    super(props)
+    this.state = props.scenario ? props.scenario : DEFAULT_STATE
   }
 
   submit = async () => {
-    const { title, html, instructions } = this.state
+    const { _id, title, html, instructions } = this.state
     const json = await client.post("/api/scenario", {
+      _id,
       title,
       html,
       instructions,
     })
-    console.log("json", json)
+    Router.push("/")
   }
 
   render() {

@@ -6,12 +6,16 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
+    "isomorphic-unfetch": "^3.0.0",
     "lodash": "^4.17.11",
+    "meteor-random": "^0.0.3",
     "mongodb": "^3.1.10",
     "next": "^7.0.2",
+    "next-routes": "^1.4.2",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
-    "styled-components": "^4.1.2"
+    "styled-components": "^4.1.2",
+    "type-of": "^2.0.1"
   },
   "scripts": {
     "dev": "babel-watch -w server --disable-autowatch server/index.js",
