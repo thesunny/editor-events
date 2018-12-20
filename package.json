@@ -11,7 +11,9 @@
     "build:server": "NODE_ENV=production babel server --out-dir .next/dist",
     "start": "NODE_ENV=production node .next/dist/index.js",
     "preflight":
-      "NODE_ENV=production PROTOCOL='http:' HOST=localhost PORT=5000 node .next/dist/index.js"
+      "NODE_ENV=production PROTOCOL='http:' HOST=localhost PORT=5000 node .next/dist/index.js",
+    "deploy": "git push heroku master",
+    "heroku-postbuild": "yarn build"
   },
   "babel": {
     "env": {
