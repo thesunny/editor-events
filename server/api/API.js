@@ -5,7 +5,8 @@ export default class API {
     this.server = server
   }
 
-  method(path, fn) {
+  method(name, fn) {
+    const path = `/api/${name}`
     if (typeOf(path) !== "string") throw new Error("path must be a String")
     if (typeOf(fn) !== "function") throw new Error("fn must be a function")
     this.server.post(path, async (req, res, next) => {

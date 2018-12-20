@@ -1,15 +1,18 @@
 import styled from "styled-components"
 import pick from "lodash/pick"
 import Link from "next/link"
-import client from "./util/client"
+import UAParser from "ua-parser-js"
+
+import client from "../util/client"
 import {
   captureNativeEvent,
   captureReactEvent,
   captureHTMLEvent,
-} from "../util/captureEvent"
-import LogItem from "../components/LogItem"
-import { NATIVE_EVENTS, REACT_EVENTS } from "../util/events"
-import Back from "./components/Back"
+} from "./captureEvent"
+import LogItem from "./LogItem"
+import { NATIVE_EVENTS, REACT_EVENTS } from "./events"
+import Back from "../components/Back"
+import getAgentTags from "../util/get-agent-tags"
 
 const __html = `<p>Hello little world</p>`
 
@@ -36,7 +39,12 @@ const EventsDiv = styled.div`
   overflow-y: scroll;
 `
 
+function Tag({ children }) {
+  return <span className={`badge badge-success mr-1`}>{children}</span>
+}
+
 export default class RecordEvents extends React.Component {
+  startedAt = null
   isFrame = false
   isTimeout = false
   lastHTML = ""
@@ -46,9 +54,11 @@ export default class RecordEvents extends React.Component {
 
   static async getInitialProps({ req, query }) {
     const userAgent = req ? req.headers["user-agent"] : navigator.userAgent
+    const ua = UAParser(userAgent)
     const { scenarioId } = query
-    const json = await client.call("/api/get-scenario", { scenarioId })
-    return { scenario: json.scenario, userAgent }
+    const json = await client.call("get-scenario", { scenarioId })
+    const tags = getAgentTags(ua)
+    return { scenario: json.scenario, userAgent, ua, tags }
   }
 
   constructor(props) {
@@ -59,7 +69,11 @@ export default class RecordEvents extends React.Component {
   submit = async () => {
     const { scenario } = this.props
     const { events } = this.state
-    console.log(events)
+    const result = await client.call("record", {
+      scenarioId: scenario._id,
+      events,
+    })
+    console.log(result)
   }
 
   setupReactEventProps() {
@@ -84,19 +98,25 @@ export default class RecordEvents extends React.Component {
   }
 
   pushLog(source, data) {
+    const nowMs = new Date().getTime()
+    const startMs = this.startedAt.getTime()
+    const ms = nowMs - startMs
     const html = getHTML()
     const { events } = this.state
     const item = { source, ...data }
     if (html !== this.lastHTML) {
       this.lastHTML = html
       const htmlEvent = captureHTMLEvent(html)
-      events.push(htmlEvent)
+      events.push({ ms, ...htmlEvent })
     }
-    events.push(item)
+    events.push({ ms, ...item })
     this.setState({ events })
   }
 
   pushEvent(source, event) {
+    if (!this.startedAt) {
+      this.startedAt = new Date()
+    }
     if (!this.isFrame) {
       this.isFrame = true
       requestAnimationFrame(() => {
@@ -133,29 +153,31 @@ export default class RecordEvents extends React.Component {
   }
 
   render() {
-    const { userAgent, scenario } = this.props
+    const { userAgent, scenario, tags } = this.props
     const { events } = this.state
     return (
       <div className="container">
         <ContentsDiv>
           <Back />
-          <div
-            className="card card-body mt-3"
-            style={{ whiteSpace: "pre-line" }}
-          >
+          <div style={{ whiteSpace: "pre-line" }}>
             <h5>{scenario.title}</h5>
-            <code><small>{userAgent}</small></code>
-            <div
-              id="content"
-              className="form-control my-4"
-              contentEditable
-              dangerouslySetInnerHTML={{ __html: scenario.html }}
-              {...this.reactEventProps}
-            />
-            <div>{scenario.instructions}</div>
-            <button className="btn btn-primary mt-4" onClick={this.submit}>
-              Submit Event Log
-            </button>
+            <code>
+              <small>{userAgent}</small>
+            </code>
+            <div>{tags.map(tag => <Tag key={tag}>{tag}</Tag>)}</div>
+            <div className="card card-body mt-3">
+              <div
+                id="content"
+                className="form-control mb-4"
+                contentEditable
+                dangerouslySetInnerHTML={{ __html: scenario.html }}
+                {...this.reactEventProps}
+              />
+              <div>{scenario.instructions}</div>
+              <button className="btn btn-primary mt-4" onClick={this.submit}>
+                Submit Event Log
+              </button>
+            </div>
           </div>
         </ContentsDiv>
         <EventsDiv>

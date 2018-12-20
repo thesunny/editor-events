@@ -1,10 +1,9 @@
 import client from "./util/client"
-import Routes from "../server/routes"
-const { Link } = Routes
+import Link from "next/link"
 
 export default class Index extends React.Component {
   static async getInitialProps({ req }) {
-    const json = await client.post("/api/scenarios", {})
+    const json = await client.call("scenarios", {})
     return { scenarios: json.scenarios }
   }
 
@@ -13,35 +12,60 @@ export default class Index extends React.Component {
     return (
       <div className="container">
         <h1>Record ContentEditable Events</h1>
-        <Link href="/scenario">
-          <a className="btn btn-primary" href="/scenario">
-            + New Scenario
+        <p>
+          This web app allows us to create edit scenarios for use in a
+          ContentEditable div that is controlled by React. We can then record
+          the events for each scenario across multiple browsers in order to get
+          a better understanding of how each browser works.
+        </p>
+        <p>
+          Created to help me fix the Slate issue{" "}
+          <a href="https://github.com/ianstormtaylor/slate/issues/2062">
+            fix editing with "soft keyboard" (e.g. Android, IMEs)
           </a>
-        </Link>{" "}
-        <Link href="/record-events">
-          <a className="btn btn-primary" href="/record-events">
-            Record Events
-          </a>
+        </p>
+        <Link href="/edit">
+          <a className="btn btn-primary">+ New Scenario</a>
         </Link>
         <ul className="list-group my-4">
           {scenarios.map(scenario => {
             return (
-              <Link
-                key={scenario._id}
-                route="record-events"
-                params={{ scenarioId: scenario._id }}
-              >
-                <a className="list-group-item list-group-item-action">
-                  {scenario.title}
-                  <Link
-                    key={scenario._id}
-                    route="scenario"
-                    params={{ scenarioId: scenario._id }}
-                  >
-                    <a className="btn btn-primary float-right">Edit</a>
-                  </Link>
-                </a>
-              </Link>
+              <div key={scenario._id} className="list-group-item">
+                <Link
+                  href={{
+                    pathname: "/record",
+                    query: { scenarioId: scenario._id },
+                  }}
+                >
+                  <a className="btn btn-primary float-right ml-1">Record</a>
+                </Link>
+                <Link
+                  href={{
+                    pathname: "/edit",
+                    query: { scenarioId: scenario._id },
+                  }}
+                >
+                  <a className="btn btn-primary float-right ml-1">Edit</a>
+                </Link>
+                <Link
+                  href={{
+                    pathname: "/view",
+                    query: { scenarioId: scenario._id },
+                  }}
+                >
+                  <a className="btn btn-primary float-right ml-1">
+                    View Recordings
+                  </a>
+                </Link>
+                <div>{scenario.title}</div>
+                <div>
+                  {scenario.tags.map(tag => (
+                    <span key={tag} className="badge badge-info mr-1">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
             )
           })}
         </ul>

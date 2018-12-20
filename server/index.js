@@ -1,6 +1,6 @@
 const { MongoClient } = require("mongodb")
 
-import routes from "./routes"
+// import routes from "./routes"
 import express from "express"
 import api from "./api"
 
@@ -13,10 +13,11 @@ const next = require("next")
 
 const dev = process.env.NODE_ENV !== "production"
 const app = next({ dev })
-const handleWithNext = routes.getRequestHandler(app)
+const handleWithNext = app.getRequestHandler()
 
-const MONGO_URL = "mongodb://localhost:27017/editor-events"
-const PORT = 5000
+const MONGO_URL =
+  process.env.MONGO_URL || "mongodb://localhost:27017/editor-events"
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 80
 
 app.prepare().then(async () => {
   const mongoClient = await MongoClient.connect(MONGO_URL, {
@@ -31,10 +32,6 @@ app.prepare().then(async () => {
     next()
   })
   api(server)
-  server.get("/record-events/:path", async (req, res, next) => {
-    const parsedUrl = parse(req.url, true)
-    return handleWithNext(req, res, "/record-events")
-  })
   server.get("*", (req, res) => {
     return handleWithNext(req, res)
   })

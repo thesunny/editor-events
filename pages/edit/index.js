@@ -1,50 +1,15 @@
-import Back from "./components/Back"
-import client from "./util/client"
+import Back from "../components/Back"
+import client from "../util/client"
 import Router from "next/router"
-
-function Field({
-  context,
-  Tag = "textarea",
-  name,
-  caption,
-  hint,
-  rows = 3,
-  placeholder,
-}) {
-  return (
-    <div className="form-group">
-      <label htmlFor={name}>{caption}</label>
-      <Tag
-        id={`#${name}`}
-        className="form-control"
-        rows={rows}
-        style={{ fontFamily: "monospace" }}
-        placeholder={placeholder}
-        onChange={e => context.setState({ [name]: e.target.value })}
-        value={context.state[name]}
-      />
-      <small className="form-text text-muted">{hint}</small>
-    </div>
-  )
-}
-
-const DEFAULT_STATE = {
-  title: "Insert word at start of existing word using the virtual keyboard",
-  html: "<p>Hello big world.</p>",
-  instructions: `# How to start the edit
-Touch the start of the word "big" to start composing.
-
-# How to make the edit
-Enter the word "very" using the virtual keyboard.
-
-# How to finish the edit
-Hit space on the virtual keyboard to finish composing.`,
-}
+import DEFAULT_STATE from "./DEFAULT_STATE"
+import Field from "./Field"
+import TagButton from "./TagButton"
 
 export default class Scenario extends React.Component {
   static async getInitialProps({ query }) {
     const { scenarioId } = query
-    const json = await client.call("/api/get-scenario", { scenarioId })
+    if (scenarioId == null) return {}
+    const json = await client.call("get-scenario", { scenarioId })
     return { scenario: json.scenario }
   }
 
@@ -54,14 +19,19 @@ export default class Scenario extends React.Component {
   }
 
   submit = async () => {
-    const { _id, title, html, instructions } = this.state
-    const json = await client.post("/api/scenario", {
+    const { _id, title, html, instructions, tags } = this.state
+    const json = await client.call("scenario", {
       _id,
       title,
       html,
       instructions,
+      tags,
     })
     Router.push("/")
+  }
+
+  handleTagsChange = tags => {
+    this.setState({ tags })
   }
 
   render() {
@@ -82,6 +52,7 @@ export default class Scenario extends React.Component {
             name="html"
             caption="Initial HTML"
             hint="Enter valid HTML to populate the ContentEditable div"
+            monospace={true}
           />
           <Field
             context={this}
@@ -90,9 +61,25 @@ export default class Scenario extends React.Component {
             hint="Provide details instructions on how to complete the edit"
             rows={8}
           />
+          <div className="form-group">
+            <label htmlFor="tags">Tags</label>
+            <div>
+              <TagButton context={this}>virtual-keyboard</TagButton>
+              <TagButton context={this}>gesture</TagButton>
+              <TagButton context={this}>ime</TagButton>
+              <TagButton context={this}>auto-suggest</TagButton>
+              <TagButton context={this}>auto-correct</TagButton>
+              <TagButton context={this}>delete</TagButton>
+              <TagButton context={this}>enter</TagButton>
+              <TagButton context={this}>special</TagButton>
+            </div>
+            <small className="form-text text-muted">
+              Add tags to classify the scenario
+            </small>
+          </div>
           <button
-            type="button"
             className="btn btn-primary"
+            type="button"
             onClick={this.submit}
           >
             Submit Scenario
