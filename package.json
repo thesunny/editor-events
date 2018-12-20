@@ -72,6 +72,7 @@
   },
   "devDependencies": {
     "@babel/cli": "7.0.0",
-    "babel-plugin-styled-components": "^1.9.4"
+    "babel-plugin-styled-components": "^1.9.4",
+    "babel-watch": "https://github.com/monathur/babel-watch.git"
   }
 }
