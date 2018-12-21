@@ -10,16 +10,21 @@ const ANDROID_API_VERSIONS = [
   [/^9[.]0/, "api-28"],
 ]
 
+function getApiVersion(os) {
+  if (os.name !== "Android") return null
+  const { version } = os
+  for (let tuple of ANDROID_API_VERSIONS) {
+    const [regex, tag] = tuple
+    if (version.match(regex)) return tag //tags.push(tag)
+  }
+  return null
+}
+
 export default function({ os, browser }) {
   const browserTag = browser.name.toLowerCase()
   const osTag = os.name.toLowerCase().replace(/\s+/g, "-")
   const tags = [browserTag, osTag]
-
-  if (os.name === "Android") {
-    const { version } = os
-    ANDROID_API_VERSIONS.forEach(([regex, tag]) => {
-      if (version.match(regex)) tags.push(tag)
-    })
-  }
-  return tags
+  const api = getApiVersion(os)
+  if (api) tags.push(api)
+  return { api, tags }
 }

@@ -12,7 +12,7 @@ import {
 } from "./captureEvent"
 import { NATIVE_EVENTS, REACT_EVENTS } from "./events"
 import Back from "../components/Back"
-import getAgentTags from "../util/get-agent-tags"
+import getAgentInfo from "../util/get-agent-info"
 
 const __html = `<p>Hello little world</p>`
 
@@ -50,6 +50,7 @@ export default class RecordEvents extends React.Component {
   lastHTML = ""
   state = {
     events: [],
+    comments: "",
   }
 
   static async getInitialProps({ req, query }) {
@@ -57,7 +58,7 @@ export default class RecordEvents extends React.Component {
     const ua = UAParser(userAgent)
     const { scenarioId } = query
     const json = await client.call("get-scenario", { scenarioId })
-    const tags = getAgentTags(ua)
+    const { tags, api } = getAgentInfo(ua)
     return { scenario: json.scenario, userAgent, ua, tags }
   }
 
@@ -68,10 +69,11 @@ export default class RecordEvents extends React.Component {
 
   submit = async () => {
     const { scenario, userAgent, tags } = this.props
-    const { events } = this.state
+    const { events, comments } = this.state
     const result = await client.call("record", {
       scenarioId: scenario._id,
       events,
+      comments,
       userAgent,
       tags,
     })
@@ -156,7 +158,7 @@ export default class RecordEvents extends React.Component {
 
   render() {
     const { userAgent, scenario, tags } = this.props
-    const { events } = this.state
+    const { events, comments } = this.state
     return (
       <div className="container">
         <div className="row">
@@ -169,6 +171,7 @@ export default class RecordEvents extends React.Component {
               </code>
               <div>{tags.map(tag => <Tag key={tag}>{tag}</Tag>)}</div>
               <div className="card card-body mt-3">
+                <h5>Make edits in here...</h5>
                 <div
                   id="content"
                   className="form-control mb-4"
@@ -176,7 +179,15 @@ export default class RecordEvents extends React.Component {
                   dangerouslySetInnerHTML={{ __html: scenario.html }}
                   {...this.reactEventProps}
                 />
+                <h5>Instructions</h5>
                 <div>{scenario.instructions}</div>
+                <h5 className="mt-4">Comments</h5>
+                <textarea
+                  className="form-control"
+                  value={comments}
+                  rows={3}
+                  onChange={e => this.setState({ comments: e.target.value })}
+                />
                 <button className="btn btn-primary mt-4" onClick={this.submit}>
                   Submit Event Log
                 </button>

@@ -1,14 +1,35 @@
 import client from "./util/client"
 import Link from "next/link"
+import UAParser from "ua-parser-js"
+import getAgentInfo from "./util/get-agent-info"
+
+function ScenarioTag({ tag }) {
+  return (
+    <span key={tag} className="badge badge-info mr-1">
+      {tag}
+    </span>
+  )
+}
+
+function RecordingTag({ tag }) {
+  return (
+    <span key={tag} className="badge badge-success mr-1">
+      {tag}
+    </span>
+  )
+}
 
 export default class Index extends React.Component {
   static async getInitialProps({ req }) {
+    const userAgent = req ? req.headers["user-agent"] : navigator.userAgent
+    const ua = UAParser(userAgent)
+    const { api } = getAgentInfo(ua)
     const json = await client.call("scenarios", {})
-    return { scenarios: json.scenarios }
+    return { api, scenarios: json.scenarios }
   }
 
   render() {
-    const { scenarios } = this.props
+    const { api, scenarios } = this.props
     return (
       <div className="container">
         <h1>Record ContentEditable Events</h1>
@@ -24,59 +45,85 @@ export default class Index extends React.Component {
             fix editing with "soft keyboard" (e.g. Android, IMEs)
           </a>
         </p>
+        <p>
+          {api ? (
+            <div>
+              <p>
+                You are using an Android browser with this API version:{" "}
+                <RecordingTag tag={api} />
+              </p>
+              <p>
+                Look for scenarios below that say "Please Contribute" which
+                don't have recordings for this version.
+              </p>
+            </div>
+          ) : (
+            "Note: You are not using an Android browser"
+          )}
+        </p>
         <Link href="/edit">
           <a className="btn btn-primary">+ New Scenario</a>
         </Link>
         <ul className="list-group my-4">
-          {scenarios.map(scenario => {
-            return (
-              <div key={scenario._id} className="list-group-item">
-                <div className="float-md-right">
-                  <Link
-                    href={{
-                      pathname: "/record",
-                      query: { scenarioId: scenario._id },
-                    }}
-                  >
-                    <a className="btn btn-primary btn-sm">Record</a>
-                  </Link>
-                  <Link
-                    href={{
-                      pathname: "/edit",
-                      query: { scenarioId: scenario._id },
-                    }}
-                  >
-                    <a className="btn btn-primary btn-sm ml-1">Edit</a>
-                  </Link>
-                  <Link
-                    href={{
-                      pathname: "/view",
-                      query: { scenarioId: scenario._id },
-                    }}
-                  >
-                    <a className="btn btn-primary btn-sm ml-1">
-                      View Recordings
-                    </a>
-                  </Link>
-                </div>
-                <div>{scenario.title}</div>
-                <div>
-                  {scenario.tags.map(tag => (
-                    <span key={tag} className="badge badge-info mr-1">
-                      {tag}
-                    </span>
-                  ))}
-                  {scenario.apis.map(tag => (
-                    <span key={tag} className="badge badge-success mr-1">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )
-          })}
+          {scenarios.map(scenario => (
+            <Scenario api={api} scenario={scenario} />
+          ))}
         </ul>
       </div>
     )
   }
+}
+
+function Scenario({ api, scenario }) {
+  const canContribute = api && !scenario.apis.includes(api)
+  return (
+    <div key={scenario._id} className="list-group-item">
+      {" "}
+      <div className="float-md-right">
+        {" "}
+        <Link
+          href={{
+            pathname: "/record",
+            query: { scenarioId: scenario._id },
+          }}
+        >
+          <a className="btn btn-primary btn-sm">Record</a>
+        </Link>
+        <Link
+          href={{
+            pathname: "/edit",
+            query: { scenarioId: scenario._id },
+          }}
+        >
+          <a className="btn btn-primary btn-sm ml-1">Edit</a>
+        </Link>
+        <Link
+          href={{
+            pathname: "/view",
+            query: { scenarioId: scenario._id },
+          }}
+        >
+          <a className="btn btn-primary btn-sm ml-1">View Recordings</a>
+        </Link>
+        <div>
+          <small>
+            {scenario.recordingCount} recording{scenario.recordingCount !== 1
+              ? "s"
+              : ""}
+          </small>
+        </div>
+      </div>
+      {canContribute ? (
+        <div className="alert alert-warning">
+          Please "Record" for this scenario!
+          There are no recordings yet for your API version.
+        </div>
+      ) : null}
+      <div>{scenario.title} </div>
+      <div>
+        {scenario.tags.map(tag => <ScenarioTag key={tag} tag={tag} />)}
+        {scenario.apis.map(tag => <RecordingTag key={tag} tag={tag} />)}
+      </div>
+    </div>
+  )
 }

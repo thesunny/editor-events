@@ -33,6 +33,7 @@ export default function api(server) {
     const tags = new Set()
     scenarios.forEach(scenario => {
       const apis = new Set()
+      scenario.recordingCount = scenario.recordings.length
       scenario.recordings.forEach(recording => {
         recording.tags.forEach(tag => {
           if (tag.match(/^api\-/)) {
@@ -79,12 +80,13 @@ export default function api(server) {
     }
   )
 
-  api.method("record", async ({ scenarioId, events, userAgent, tags }, db) => {
+  api.method("record", async ({ scenarioId, events, comments, userAgent, tags }, db) => {
     const collection = db.collection("recordings")
     const { insertedId } = await collection.insertOne({
       _id: Random.id(),
       scenarioId,
       events,
+      comments,
       userAgent,
       tags,
       createdAt: new Date(),

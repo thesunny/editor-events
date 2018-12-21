@@ -65,6 +65,7 @@ export default class Scenario extends React.Component {
             <label htmlFor="tags">Tags</label>
             <div>
               <TagButton context={this}>virtual-keyboard</TagButton>
+              <TagButton context={this}>hardware-keyboard</TagButton>
               <TagButton context={this}>gesture</TagButton>
               <TagButton context={this}>ime</TagButton>
               <TagButton context={this}>auto-suggest</TagButton>
