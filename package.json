@@ -4,21 +4,21 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev":
-      "PROTOCOL='http:' HOST=localhost PORT=5000 babel-watch -w server --disable-autowatch server/index.js",
+    "dev": "PROTOCOL='http:' HOST=localhost PORT=5000 babel-watch -w server --disable-autowatch server/index.js",
     "build": "yarn build:next && yarn build:server",
     "build:next": "next build",
     "build:server": "NODE_ENV=production babel server --out-dir .next/dist",
-    "start": "NODE_ENV=production node .next/dist/index.js",
-    "preflight":
-      "NODE_ENV=production PROTOCOL='http:' HOST=localhost PORT=5000 node .next/dist/index.js",
+    "start": "NODE_ENV=production PROTOCOL='http:' HOST=localhost PORT=5000 heroku local",
     "deploy": "git push heroku master",
+    "# HEROKU": "Heroku",
     "heroku-postbuild": "yarn build"
   },
   "babel": {
     "env": {
       "development": {
-        "presets": ["next/babel"],
+        "presets": [
+          "next/babel"
+        ],
         "plugins": [
           [
             "styled-components",
@@ -58,7 +58,9 @@
   "dependencies": {
     "@zeit/next-css": "^1.0.1",
     "body-parser": "^1.18.3",
+    "ejson": "^2.1.2",
     "express": "^4.16.4",
+    "fecha": "^3.0.2",
     "isomorphic-unfetch": "^3.0.0",
     "lodash": "^4.17.11",
     "meteor-random": "^0.0.3",

@@ -24,7 +24,6 @@ app.prepare().then(async () => {
     useNewUrlParser: true,
   })
   const db = mongoClient.db("editor-events")
-  const collection = db.collection("editor-events")
   const server = express()
   server.use(bodyParser.json())
   server.use((req, res, next) => {

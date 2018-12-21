@@ -31,36 +31,43 @@ export default class Index extends React.Component {
           {scenarios.map(scenario => {
             return (
               <div key={scenario._id} className="list-group-item">
-                <Link
-                  href={{
-                    pathname: "/record",
-                    query: { scenarioId: scenario._id },
-                  }}
-                >
-                  <a className="btn btn-primary float-right ml-1">Record</a>
-                </Link>
-                <Link
-                  href={{
-                    pathname: "/edit",
-                    query: { scenarioId: scenario._id },
-                  }}
-                >
-                  <a className="btn btn-primary float-right ml-1">Edit</a>
-                </Link>
-                <Link
-                  href={{
-                    pathname: "/view",
-                    query: { scenarioId: scenario._id },
-                  }}
-                >
-                  <a className="btn btn-primary float-right ml-1">
-                    View Recordings
-                  </a>
-                </Link>
+                <div className="float-md-right">
+                  <Link
+                    href={{
+                      pathname: "/record",
+                      query: { scenarioId: scenario._id },
+                    }}
+                  >
+                    <a className="btn btn-primary btn-sm">Record</a>
+                  </Link>
+                  <Link
+                    href={{
+                      pathname: "/edit",
+                      query: { scenarioId: scenario._id },
+                    }}
+                  >
+                    <a className="btn btn-primary btn-sm ml-1">Edit</a>
+                  </Link>
+                  <Link
+                    href={{
+                      pathname: "/view",
+                      query: { scenarioId: scenario._id },
+                    }}
+                  >
+                    <a className="btn btn-primary btn-sm ml-1">
+                      View Recordings
+                    </a>
+                  </Link>
+                </div>
                 <div>{scenario.title}</div>
                 <div>
                   {scenario.tags.map(tag => (
                     <span key={tag} className="badge badge-info mr-1">
+                      {tag}
+                    </span>
+                  ))}
+                  {scenario.apis.map(tag => (
+                    <span key={tag} className="badge badge-success mr-1">
                       {tag}
                     </span>
                   ))}

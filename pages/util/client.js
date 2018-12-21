@@ -1,3 +1,4 @@
+// import EJSON from "ejson"
 import fetch from "isomorphic-unfetch"
 
 function getBeforePath() {
@@ -24,6 +25,6 @@ export default {
       },
       body: JSON.stringify(json),
     })
-    return response.json()
+    return await response.json()
   },
 }

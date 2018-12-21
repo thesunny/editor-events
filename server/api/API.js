@@ -1,4 +1,5 @@
 import typeOf from "type-of"
+import EJSON from "ejson"
 
 export default class API {
   constructor(server) {
@@ -14,11 +15,10 @@ export default class API {
         const result = await fn(req.body, req.db, req)
         if (typeOf(result) !== "object")
           throw new Error("result must be an Object")
-        res.send(result)
+        res.send(EJSON.toJSONValue(result))
       } catch (e) {
         next(e)
       }
     })
   }
 }
-

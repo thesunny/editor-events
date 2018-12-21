@@ -2,6 +2,7 @@ import styled from "styled-components"
 import pick from "lodash/pick"
 import Link from "next/link"
 import UAParser from "ua-parser-js"
+import Events from "../components/Events"
 
 import client from "../util/client"
 import {
@@ -9,7 +10,6 @@ import {
   captureReactEvent,
   captureHTMLEvent,
 } from "./captureEvent"
-import LogItem from "./LogItem"
 import { NATIVE_EVENTS, REACT_EVENTS } from "./events"
 import Back from "../components/Back"
 import getAgentTags from "../util/get-agent-tags"
@@ -21,23 +21,23 @@ function getHTML() {
   return el.innerHTML
 }
 
-const ContentsDiv = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 60%;
-  bottom: 0;
-  padding: 10px;
-`
+// const ContentsDiv = styled.div`
+//   position: absolute;
+//   top: 0;
+//   left: 0;
+//   right: 60%;
+//   bottom: 0;
+//   padding: 10px;
+// `
 
-const EventsDiv = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 40%;
-  overflow-y: scroll;
-`
+// const EventsDiv = styled.div`
+//   position: absolute;
+//   top: 0;
+//   right: 0;
+//   bottom: 0;
+//   left: 40%;
+//   overflow-y: scroll;
+// `
 
 function Tag({ children }) {
   return <span className={`badge badge-success mr-1`}>{children}</span>
@@ -67,11 +67,13 @@ export default class RecordEvents extends React.Component {
   }
 
   submit = async () => {
-    const { scenario } = this.props
+    const { scenario, userAgent, tags } = this.props
     const { events } = this.state
     const result = await client.call("record", {
       scenarioId: scenario._id,
       events,
+      userAgent,
+      tags,
     })
     console.log(result)
   }
@@ -157,38 +159,34 @@ export default class RecordEvents extends React.Component {
     const { events } = this.state
     return (
       <div className="container">
-        <ContentsDiv>
-          <Back />
-          <div style={{ whiteSpace: "pre-line" }}>
-            <h5>{scenario.title}</h5>
-            <code>
-              <small>{userAgent}</small>
-            </code>
-            <div>{tags.map(tag => <Tag key={tag}>{tag}</Tag>)}</div>
-            <div className="card card-body mt-3">
-              <div
-                id="content"
-                className="form-control mb-4"
-                contentEditable
-                dangerouslySetInnerHTML={{ __html: scenario.html }}
-                {...this.reactEventProps}
-              />
-              <div>{scenario.instructions}</div>
-              <button className="btn btn-primary mt-4" onClick={this.submit}>
-                Submit Event Log
-              </button>
+        <div className="row">
+          <div className="col-md">
+            <Back />
+            <div style={{ whiteSpace: "pre-line" }}>
+              <h5>{scenario.title}</h5>
+              <code>
+                <small>{userAgent}</small>
+              </code>
+              <div>{tags.map(tag => <Tag key={tag}>{tag}</Tag>)}</div>
+              <div className="card card-body mt-3">
+                <div
+                  id="content"
+                  className="form-control mb-4"
+                  contentEditable
+                  dangerouslySetInnerHTML={{ __html: scenario.html }}
+                  {...this.reactEventProps}
+                />
+                <div>{scenario.instructions}</div>
+                <button className="btn btn-primary mt-4" onClick={this.submit}>
+                  Submit Event Log
+                </button>
+              </div>
             </div>
           </div>
-        </ContentsDiv>
-        <EventsDiv>
-          <table className="table table-sm">
-            <tbody>
-              {events.map((event, index) => {
-                return <LogItem key={index} index={index} event={event} />
-              })}
-            </tbody>
-          </table>
-        </EventsDiv>
+          <div className="col-md">
+            <Events events={events} />
+          </div>
+        </div>
       </div>
     )
   }
