@@ -2,6 +2,7 @@ import client from "./util/client"
 import Link from "next/link"
 import UAParser from "ua-parser-js"
 import getAgentInfo from "./util/get-agent-info"
+import getIsAdmin from "./util/get-is-admin"
 
 function ScenarioTag({ tag }) {
   return (
@@ -25,11 +26,12 @@ export default class Index extends React.Component {
     const ua = UAParser(userAgent)
     const { api } = getAgentInfo(ua)
     const json = await client.call("scenarios", {})
-    return { api, scenarios: json.scenarios }
+    const isAdmin = getIsAdmin()
+    return { isAdmin, api, scenarios: json.scenarios }
   }
 
   render() {
-    const { api, scenarios } = this.props
+    const { isAdmin, api, scenarios } = this.props
     return (
       <div className="container">
         <h1>Record ContentEditable Events</h1>
@@ -61,12 +63,19 @@ export default class Index extends React.Component {
             "Note: You are not using an Android browser"
           )}
         </p>
-        <Link href="/edit">
-          <a className="btn btn-primary">+ New Scenario</a>
-        </Link>
+        {isAdmin ? (
+          <Link href="/edit">
+            <a className="btn btn-primary">+ New Scenario</a>
+          </Link>
+        ) : null}
         <ul className="list-group my-4">
           {scenarios.map(scenario => (
-            <Scenario api={api} scenario={scenario} />
+            <Scenario
+              isAdmin={isAdmin}
+              key={scenario._id}
+              api={api}
+              scenario={scenario}
+            />
           ))}
         </ul>
       </div>
@@ -74,10 +83,10 @@ export default class Index extends React.Component {
   }
 }
 
-function Scenario({ api, scenario }) {
+function Scenario({ isAdmin, api, scenario }) {
   const canContribute = api && !scenario.apis.includes(api)
   return (
-    <div key={scenario._id} className="list-group-item">
+    <div className="list-group-item">
       {" "}
       <div className="float-md-right">
         {" "}
@@ -89,14 +98,16 @@ function Scenario({ api, scenario }) {
         >
           <a className="btn btn-primary btn-sm">Record</a>
         </Link>
-        <Link
-          href={{
-            pathname: "/edit",
-            query: { scenarioId: scenario._id },
-          }}
-        >
-          <a className="btn btn-primary btn-sm ml-1">Edit</a>
-        </Link>
+        {isAdmin ? (
+          <Link
+            href={{
+              pathname: "/edit",
+              query: { scenarioId: scenario._id },
+            }}
+          >
+            <a className="btn btn-primary btn-sm ml-1">Edit</a>
+          </Link>
+        ) : null}
         <Link
           href={{
             pathname: "/view",
@@ -115,8 +126,8 @@ function Scenario({ api, scenario }) {
       </div>
       {canContribute ? (
         <div className="alert alert-warning">
-          Please "Record" for this scenario!
-          There are no recordings yet for your API version.
+          Please "Record" for this scenario! There are no recordings yet for
+          your API version.
         </div>
       ) : null}
       <div>{scenario.title} </div>
