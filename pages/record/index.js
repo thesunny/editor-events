@@ -3,6 +3,7 @@ import pick from "lodash/pick"
 import Link from "next/link"
 import UAParser from "ua-parser-js"
 import Events from "../components/Events"
+import Router from "next/router"
 
 import client from "../util/client"
 import {
@@ -77,7 +78,7 @@ export default class RecordEvents extends React.Component {
       userAgent,
       tags,
     })
-    console.log(result)
+    Router.push("/")
   }
 
   setupReactEventProps() {
