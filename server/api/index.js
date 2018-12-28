@@ -1,7 +1,7 @@
 import EJSON from "ejson"
 import Random from "meteor-random"
 import API from "./API"
-import getAgentInfo from "../../pages/util/get-agent-info"
+import getAgentInfo from "../get-agent-info"
 
 export default function api(server) {
   const api = new API(server)

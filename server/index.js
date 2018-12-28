@@ -2,7 +2,7 @@ const { MongoClient } = require("mongodb")
 
 // import routes from "./routes"
 import express from "express"
-import api from "./api"
+import api from "./api/index"
 
 // const express = require("express")
 
