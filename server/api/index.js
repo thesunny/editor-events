@@ -33,6 +33,7 @@ export default function api(server) {
             title: 1,
             html: 1,
             instructions: 1,
+            starred: 1,
             tags: 1,
             createdAt: 1,
             "recordings.userAgent": 1,
@@ -40,6 +41,7 @@ export default function api(server) {
         },
         {
           $sort: {
+            starred: -1,
             createdAt: 1,
           },
         },

@@ -3,6 +3,13 @@ import Link from "next/link"
 import UAParser from "ua-parser-js"
 import getAgentInfo from "./util/get-agent-info"
 import getIsAdmin from "./util/get-is-admin"
+import styled from "styled-components"
+
+const Starred = styled.span``
+
+const Unstarred = styled.span`
+  color: #F0F0F0;
+`
 
 function ScenarioTag({ tag }) {
   return (
@@ -19,6 +26,8 @@ function RecordingTag({ tag }) {
     </span>
   )
 }
+
+
 
 export default class Index extends React.Component {
   static async getInitialProps({ req }) {
@@ -129,7 +138,7 @@ function Scenario({ isAdmin, api, scenario }) {
           your API version.
         </div>
       ) : null}
-      <div>{scenario.title} </div>
+      <div>{scenario.starred ? <Starred>⭐</Starred> : <Unstarred>★&nbsp;</Unstarred> }{scenario.title} </div>
       <div>
         {scenario.tags.map(tag => <ScenarioTag key={tag} tag={tag} />)}
         {scenario.apis.map(tag => <RecordingTag key={tag} tag={tag} />)}
