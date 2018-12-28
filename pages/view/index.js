@@ -17,9 +17,18 @@ const RecordingsDiv = styled.div`
   bottom: 0;
   overflow: scroll;
 `
-const RecordingTd = styled.td`
+const RecordingTd = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
   vertical-align: top;
-  width: 400px;
+  width: 350px;
+`
+
+const UserAgentDiv = styled.div`
+  font: 12px monospace;
+  height: 60px;
+  overflow-y: scroll;
 `
 
 function Tags({ tags }) {
@@ -103,25 +112,16 @@ export default class ViewRecordings extends React.Component {
             ))}
           </div>
         </ScenarioDiv>
-        <RecordingsDiv>
-          <table>
-            <tbody>
-              <tr>
-                {filteredRecordings.map(recording => {
-                  return (
-                    <RecordingTd>
-                      <FormattedDate
-                        date={new Date(recording.createdAt.$date)}
-                      />
-                      <Tags tags={recording.tags} />
-                      <Events events={recording.events} />
-                    </RecordingTd>
-                  )
-                })}
-              </tr>
-            </tbody>
-          </table>
-        </RecordingsDiv>
+        {filteredRecordings.map((recording, index) => {
+          return (
+            <RecordingTd style={{ left: index * 360 + 480 }}>
+              <FormattedDate date={new Date(recording.createdAt.$date)} />
+              <UserAgentDiv>{recording.userAgent}</UserAgentDiv>
+              <Tags tags={recording.tags} />
+              <Events events={recording.events} />
+            </RecordingTd>
+          )
+        })}
       </div>
     )
   }

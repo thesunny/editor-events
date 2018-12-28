@@ -22,23 +22,11 @@ function getHTML() {
   return el.innerHTML
 }
 
-// const ContentsDiv = styled.div`
-//   position: absolute;
-//   top: 0;
-//   left: 0;
-//   right: 60%;
-//   bottom: 0;
-//   padding: 10px;
-// `
-
-// const EventsDiv = styled.div`
-//   position: absolute;
-//   top: 0;
-//   right: 0;
-//   bottom: 0;
-//   left: 40%;
-//   overflow-y: scroll;
-// `
+const EditorDiv = styled.div`
+  border: 1px solid #E0E0E0;
+  padding: 10px;
+  border-radius: 5px;
+`
 
 function Tag({ children }) {
   return <span className={`badge badge-success mr-1`}>{children}</span>
@@ -56,11 +44,10 @@ export default class RecordEvents extends React.Component {
 
   static async getInitialProps({ req, query }) {
     const userAgent = req ? req.headers["user-agent"] : navigator.userAgent
-    const ua = UAParser(userAgent)
     const { scenarioId } = query
     const json = await client.call("get-scenario", { scenarioId })
-    const { tags, api } = getAgentInfo(ua)
-    return { scenario: json.scenario, userAgent, ua, tags }
+    const { tags, api, ua } = getAgentInfo(userAgent)
+    return { scenario: json.scenario, userAgent, ua, api, tags }
   }
 
   constructor(props) {
@@ -158,7 +145,7 @@ export default class RecordEvents extends React.Component {
   }
 
   render() {
-    const { userAgent, scenario, tags } = this.props
+    const { userAgent, scenario, api, tags } = this.props
     const { events, comments } = this.state
     return (
       <div className="container">
@@ -170,12 +157,15 @@ export default class RecordEvents extends React.Component {
               <code>
                 <small>{userAgent}</small>
               </code>
-              <div>{tags.map(tag => <Tag key={tag}>{tag}</Tag>)}</div>
+              <div>
+                {api ? <Tag>{api}</Tag>: null}
+                {tags.map(tag => <Tag key={tag}>{tag}</Tag>)}
+              </div>
               <div className="card card-body mt-3">
                 <h5>Make edits in here...</h5>
-                <div
+                <EditorDiv
                   id="content"
-                  className="form-control mb-4"
+                  className="mb-4"
                   contentEditable
                   dangerouslySetInnerHTML={{ __html: scenario.html }}
                   {...this.reactEventProps}

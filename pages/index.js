@@ -23,8 +23,7 @@ function RecordingTag({ tag }) {
 export default class Index extends React.Component {
   static async getInitialProps({ req }) {
     const userAgent = req ? req.headers["user-agent"] : navigator.userAgent
-    const ua = UAParser(userAgent)
-    const { api } = getAgentInfo(ua)
+    const { api } = getAgentInfo(userAgent)
     const json = await client.call("scenarios", {})
     const isAdmin = getIsAdmin()
     return { isAdmin, api, scenarios: json.scenarios }

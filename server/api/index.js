@@ -1,6 +1,7 @@
 import EJSON from "ejson"
 import Random from "meteor-random"
 import API from "./API"
+import getAgentInfo from "../../pages/util/get-agent-info"
 
 export default function api(server) {
   const api = new API(server)
@@ -25,7 +26,7 @@ export default function api(server) {
             instructions: 1,
             tags: 1,
             createdAt: 1,
-            "recordings.tags": 1,
+            "recordings.userAgent": 1,
           },
         },
       ])
@@ -35,15 +36,19 @@ export default function api(server) {
       const apis = new Set()
       scenario.recordingCount = scenario.recordings.length
       scenario.recordings.forEach(recording => {
-        recording.tags.forEach(tag => {
-          if (tag.match(/^api\-/)) {
-            apis.add(tag)
-          }
-        })
+        const { userAgent } = recording
+        const { api } = getAgentInfo(userAgent)
+        apis.add(api)
+        // recording.tags.forEach(tag => {
+        //   if (tag.match(/^api\-/)) {
+        //     apis.add(tag)
+        //   }
+        // })
       })
       scenario.apis = Array.from(apis)
       delete scenario.recordings
     })
+    console.log(scenarios)
     return { scenarios }
   })
 
@@ -80,17 +85,20 @@ export default function api(server) {
     }
   )
 
-  api.method("record", async ({ scenarioId, events, comments, userAgent, tags }, db) => {
-    const collection = db.collection("recordings")
-    const { insertedId } = await collection.insertOne({
-      _id: Random.id(),
-      scenarioId,
-      events,
-      comments,
-      userAgent,
-      tags,
-      createdAt: new Date(),
-    })
-    return { insertedId }
-  })
+  api.method(
+    "record",
+    async ({ scenarioId, events, comments, userAgent, tags }, db) => {
+      const collection = db.collection("recordings")
+      const { insertedId } = await collection.insertOne({
+        _id: Random.id(),
+        scenarioId,
+        events,
+        comments,
+        userAgent,
+        tags,
+        createdAt: new Date(),
+      })
+      return { insertedId }
+    }
+  )
 }

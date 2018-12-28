@@ -1,13 +1,15 @@
+import UAParser from "ua-parser-js"
+
 const ANDROID_API_VERSIONS = [
-  [/^4[.]4/, "api-20"],
-  [/^5[.]0/, "api-21"],
-  [/^5[.]1/, "api-22"],
-  [/^6[.]0/, "api-23"],
-  [/^7[.]0/, "api-24"],
-  [/^7[.]1/, "api-25"],
-  [/^8[.]0/, "api-26"],
-  [/^8[.]1/, "api-27"],
-  [/^9[.]0/, "api-28"],
+  [/^4[.]4/, "API-20"],
+  [/^5([.]0|[^.])/, "API-21"],
+  [/^5[.]1/, "API-22"],
+  [/^6([.]0|[^.])/, "API-23"],
+  [/^7([.]0|[^.])/, "API-24"],
+  [/^7[.]1/, "API-25"],
+  [/^8([.]0|[^.])/, "API-26"],
+  [/^8[.]1/, "API-27"],
+  [/^9([.]0|[^.])/, "API-28"],
 ]
 
 function getApiVersion(os) {
@@ -20,11 +22,10 @@ function getApiVersion(os) {
   return null
 }
 
-export default function({ os, browser }) {
-  const browserTag = browser.name.toLowerCase()
-  const osTag = os.name.toLowerCase().replace(/\s+/g, "-")
-  const tags = [browserTag, osTag]
+export default function(userAgent) {
+  const ua = UAParser(userAgent)
+  const { os, browser, device } = ua
+  const tags = [browser.name, os.name, device.type, device.vendor]
   const api = getApiVersion(os)
-  if (api) tags.push(api)
-  return { api, tags }
+  return { api, tags, ua }
 }

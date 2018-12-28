@@ -9,7 +9,7 @@
     "build:next": "next build",
     "build:server": "NODE_ENV=production babel server --out-dir .next/dist",
     "start": "NODE_ENV=production PROTOCOL='http:' HOST=localhost PORT=5000 heroku local",
-    "deploy": "git push heroku master",
+    "deploy": "yarn build && git push heroku master",
     "# HEROKU": "Heroku",
     "heroku-postbuild": "yarn build"
   },
