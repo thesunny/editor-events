@@ -16,7 +16,6 @@ export default function api(server) {
 
   api.method("scenarios", async (params, db, req) => {
     const ip = getIpFromReq(req)
-    console.log("ip", ip)
     const collection = db.collection("scenarios")
     const scenarios = await await db
       .collection("scenarios")
@@ -37,6 +36,11 @@ export default function api(server) {
             tags: 1,
             createdAt: 1,
             "recordings.userAgent": 1,
+          },
+        },
+        {
+          $sort: {
+            createdAt: 1,
           },
         },
       ])
