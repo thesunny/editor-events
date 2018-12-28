@@ -1,3 +1,8 @@
+// NOTE:
+// Yuck! Redundant! This is a copy from `pages/util/get-agent-info`.
+// But easiest way to get it to work without messing around with rollup or
+// webpack.
+
 import UAParser from "ua-parser-js"
 
 const ANDROID_API_VERSIONS = [

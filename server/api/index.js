@@ -3,10 +3,20 @@ import Random from "meteor-random"
 import API from "./API"
 import getAgentInfo from "../get-agent-info"
 
+function getIpFromReq(req) {
+  const ipString =
+    req.headers["x-forwarded-for"] || req.connection.remoteAddress
+  const matchData = ipString.match(/[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+/)
+  if (matchData) return matchData[0]
+  return "unknown"
+}
+
 export default function api(server) {
   const api = new API(server)
 
   api.method("scenarios", async (params, db, req) => {
+    const ip = getIpFromReq(req)
+    console.log("ip", ip)
     const collection = db.collection("scenarios")
     const scenarios = await await db
       .collection("scenarios")
@@ -48,7 +58,6 @@ export default function api(server) {
       scenario.apis = Array.from(apis)
       delete scenario.recordings
     })
-    console.log(scenarios)
     return { scenarios }
   })
 
@@ -87,7 +96,9 @@ export default function api(server) {
 
   api.method(
     "record",
-    async ({ scenarioId, events, comments, userAgent, tags }, db) => {
+    async ({ scenarioId, events, comments, userAgent, tags }, db, req) => {
+      const ip = getIpFromReq(req)
+      console.log("ip", ip)
       const collection = db.collection("recordings")
       const { insertedId } = await collection.insertOne({
         _id: Random.id(),
@@ -95,6 +106,7 @@ export default function api(server) {
         events,
         comments,
         userAgent,
+        ip,
         tags,
         createdAt: new Date(),
       })
