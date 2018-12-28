@@ -55,13 +55,9 @@ export default function api(server) {
         const { userAgent } = recording
         const { api } = getAgentInfo(userAgent)
         apis.add(api)
-        // recording.tags.forEach(tag => {
-        //   if (tag.match(/^api\-/)) {
-        //     apis.add(tag)
-        //   }
-        // })
       })
       scenario.apis = Array.from(apis)
+      scenario.apis.sort()
       delete scenario.recordings
     })
     return { scenarios }
