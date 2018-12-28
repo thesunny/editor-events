@@ -4,6 +4,7 @@ import styled from "styled-components"
 import Back from "../components/Back"
 import client from "../util/client"
 import Events from "../components/Events"
+import getAgentInfo from "../util/get-agent-info"
 
 const ScenarioDiv = styled.div`
   float: left;
@@ -32,11 +33,16 @@ const UserAgentDiv = styled.div`
 `
 
 function Tags({ tags }) {
-  return tags.map(tag => (
-    <span key={tag} className="badge badge-success mr-1">
-      {tag}
-    </span>
-  ))
+  const elements = []
+  tags.forEach(tag => {
+    if (tag == null) return
+    elements.push(
+      <span key={tag} className="badge badge-success mr-1">
+        {tag}
+      </span>
+    )
+  })
+  return elements
 }
 
 function FormattedDate({ date }) {
@@ -93,31 +99,38 @@ export default class ViewRecordings extends React.Component {
           <div className="mt-4">
             <h4>Recordings</h4>
             <p>Check the recordings you wish to view</p>
-            {recordings.map(recording => (
-              <div key={recording._id}>
-                <input
-                  id={`checkbox_${recording._id}`}
-                  className="mr-1"
-                  type="checkbox"
-                  checked={!!checked[recording._id]}
-                  onChange={() => {
-                    this.check(recording._id)
-                  }}
-                />
-                <label htmlFor={`checkbox_${recording._id}`}>
-                  <FormattedDate date={new Date(recording.createdAt.$date)} />
-                  <Tags tags={recording.tags} />
-                </label>
-              </div>
-            ))}
+            {recordings.map(recording => {
+              const { badges } = getAgentInfo(recording.userAgent)
+              return (
+                <div key={recording._id}>
+                  <input
+                    id={`checkbox_${recording._id}`}
+                    className="mr-1"
+                    type="checkbox"
+                    checked={!!checked[recording._id]}
+                    onChange={() => {
+                      this.check(recording._id)
+                    }}
+                  />
+                  <label htmlFor={`checkbox_${recording._id}`}>
+                    <FormattedDate date={new Date(recording.createdAt.$date)} />
+                    <Tags tags={badges} />
+                  </label>
+                </div>
+              )
+            })}
           </div>
         </ScenarioDiv>
         {filteredRecordings.map((recording, index) => {
+          const { badges } = getAgentInfo(recording.userAgent)
           return (
-            <RecordingTd style={{ left: index * 360 + 480 }}>
+            <RecordingTd
+              key={recording._id}
+              style={{ left: index * 360 + 480 }}
+            >
               <FormattedDate date={new Date(recording.createdAt.$date)} />
               <UserAgentDiv>{recording.userAgent}</UserAgentDiv>
-              <Tags tags={recording.tags} />
+              <Tags tags={badges} />
               <Events events={recording.events} />
             </RecordingTd>
           )
