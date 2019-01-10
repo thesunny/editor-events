@@ -22,7 +22,7 @@ function getStyling(event) {
         icon: "Mutation",
         className: "",
         output: event.mutations
-          ? event.mutations.map(mutation => `${mutation.type} ${mutation.target}`).join("\n")
+          ? event.mutations.map(mutation => mutation.type).join(" ")
           : null,
         style: { backgroundColor: "#FFFFF0" },
       }
