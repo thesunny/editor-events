@@ -10,6 +10,7 @@ import {
   captureNativeEvent,
   captureReactEvent,
   captureHTMLEvent,
+  captureMutationEvent,
 } from "./captureEvent"
 import { NATIVE_EVENTS, REACT_EVENTS } from "./events"
 import Back from "../components/Back"
@@ -23,7 +24,7 @@ function getHTML() {
 }
 
 const EditorDiv = styled.div`
-  border: 1px solid #E0E0E0;
+  border: 1px solid #e0e0e0;
   padding: 10px;
   border-radius: 5px;
 `
@@ -79,6 +80,16 @@ export default class RecordEvents extends React.Component {
     const el = document.getElementById("content")
     NATIVE_EVENTS.forEach(eventName => {
       el.addEventListener(eventName, this.recordNativeEvent)
+    })
+
+    const observer = new MutationObserver(this.recordMutationEvent)
+    observer.observe(el, {
+      childList: true,
+      attriutes: true,
+      characterData: true,
+      subtree: true,
+      attributeOldValue: true,
+      characterDataOldValue: true,
     })
   }
 
@@ -144,6 +155,11 @@ export default class RecordEvents extends React.Component {
     this.pushEvent("REACT", event)
   }
 
+  recordMutationEvent = e => {
+    const event = captureMutationEvent(e)
+    this.pushEvent("MUTATION", event)
+  }
+
   render() {
     const { userAgent, scenario, api, tags } = this.props
     const { events, comments } = this.state
@@ -158,8 +174,10 @@ export default class RecordEvents extends React.Component {
                 <small>{userAgent}</small>
               </code>
               <div>
-                {api ? <Tag>{api}</Tag>: null}
-                {tags.map(tag => <Tag key={tag}>{tag}</Tag>)}
+                {api ? <Tag>{api}</Tag> : null}
+                {tags.filter(tag => tag).map(tag => {
+                  return <Tag key={tag}>{tag}</Tag>
+                })}
               </div>
               <div className="card card-body mt-3">
                 <h5>Make edits in here...</h5>

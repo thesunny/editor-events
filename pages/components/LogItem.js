@@ -17,15 +17,24 @@ function getStyling(event) {
       return { icon: "Trans", className: "table-dark" }
     case "HTML":
       return { icon: "HTML", className: "table-default" }
+    case "MUTATION":
+      return {
+        icon: "Mutation",
+        className: "",
+        output: event.mutations
+          ? event.mutations.map(mutation => `${mutation.type} ${mutation.target}`).join("\n")
+          : null,
+        style: { backgroundColor: "#FFFFF0" },
+      }
     default:
       throw new Error(`no match for ${source}`)
   }
 }
 
 export default ({ index, event }) => {
-  const { icon, className } = getStyling(event)
+  const { icon, className, output, style } = getStyling(event)
   return (
-    <tr className={className}>
+    <tr className={className} style={style} onClick={() => console.log(event)} title="Click to console.log this event">
       {event.source === "HTML" ? (
         <td
           className="text-monospace py-2 px-3"
@@ -40,8 +49,9 @@ export default ({ index, event }) => {
             {Math.round(event.ms / 10) / 100}
           </td>
           <td style={{ textAlign: "left" }}>{icon}</td>
-          <td>
-            {event.type} {event.key ? ` (${event.key})` : null}
+          <td style={{whiteSpace: 'pre-wrap'}}>
+            {event.type ? `${event.type} ` : null}
+            {output ? output : event.key ? ` (${event.key})` : null}
           </td>
         </React.Fragment>
       )}
